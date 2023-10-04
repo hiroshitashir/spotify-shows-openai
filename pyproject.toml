@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "spotify-shows"
+version = "0.1.0"
+description = ""
+authors = ["Hiroshi Tashiro <hiroshitash@gmail.com>"]
+readme = "README.md"
+packages = [{include = "spotify_shows"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+spotify = "^0.10.2"
+pyppeteer = "^1.0.2"
+openai = "^0.28.1"
+beautifulsoup4 = "^4.12.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

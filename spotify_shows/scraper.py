@@ -19,6 +19,7 @@ async def get_content(url: str) -> str:
     Extract the article from the URL with Python's Trafilatura library and Pyppeteer
     """
     # Scrape the page with Pyppeteer headless browser
+    #print(f"get_content url: {url}")
     scraper = Scraper()
     await scraper.set_browser()
     try:
@@ -30,7 +31,6 @@ async def get_content(url: str) -> str:
         page: Page = await scraper.get_response(url)
 
     content = await page.content()
-
     soup = BeautifulSoup(content, "html.parser") # create a new bs4 object from the html data loaded
     for script in soup(["script", "style"]): # remove all javascript and stylesheet code
         script.extract()

@@ -12,8 +12,9 @@ async def main():
   scope = "user-top-read"
   sp = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scope))
 
-  top_artists = sp.current_user_top_artists(limit=2)
+  top_artists = sp.current_user_top_artists(limit=15)
   #print("Your top artists: %s" % top_artists)
+  #top_artists = { 'items': [{'name': "Bay Ledges"}] }
 
   output = ""
   for a in top_artists['items']:
@@ -22,9 +23,9 @@ async def main():
 
     # scrape https://www.songkick.com/search?page=1&per_page=10&query=steve+aoki&type=upcoming
     content = await get_content(f"https://www.songkick.com/search?page=1&per_page=10&query={a['name'].replace(' ', '+')}&type=upcoming")
-    
+    if content.find("Sorry, we found no results") != -1:
+      continue
     response = askNearbyConcerts(LOCATION, content)
-    #print("response: %s" % response)
 
     if len(output) > 0:
       output += "\n\n"
@@ -36,7 +37,10 @@ async def main():
 
 
 def askNearbyConcerts(locName, htmlContent):
-  prompt = f"""Extract concert information in html provided by user. Are there concerts 100 miles from {locName} within 30 days? If so, list concerts in the desired format below surrounded by triple backquotes. The list should be ordered by concert dates. Otherwise, return 'No information found.'
+  prompt = f"""Extract concert information (date, location, distance from {locName}) 
+  in html provided by user. Are there concerts 100 miles from {locName} within 30 days? 
+  If so, list concerts in the desired format below surrounded by triple backquotes. 
+  The list should be ordered by concert dates. Otherwise, return 'No concerts found.'
 
   ```Date: <date>
   Location: <location>
@@ -52,21 +56,32 @@ def askNearbyConcerts(locName, htmlContent):
     max_tokens=2000
   )
 
-  import pdb; pdb.set_trace()
   res = response['choices'][0]['message']['content']
-  date, loc, dist = None, None, None
+  lineDate, lineLoc, dist = None, None, None
+  output = ""
   for line in res.split('\n'):
-    if line.startWith("Date:"):
-      date = line[5:]
-    elif line.startWith("Location:"):
-      loc = line[9:]
-    elif line.startWith("Distance from"):
-      idx = line.indexOf(':')
-      dist = line[idx+1:]
-    
+    if line.startswith("Date:"):
+      lineDate = line
+    elif line.startswith("Location:"):
+      lineLoc = line
+    elif line.startswith("Distance from"):
+      idx = line.index(':')
+      dist = line[idx+1:].replace("```", "")
+      dist = dist.replace(" miles", "")
+      dist = dist.replace(",", "")
+      try:
+        dist = int(dist)
+        if dist < 100:
+          if len(output) > 0:
+            output += "\n\n"
+          output += f"{lineDate}\n{lineLoc}\n{line}"
+      except Exception as e:
+        print(f"WARN: There was an error parsing distance. '{e}'")
+        pass
+  if len(output) == 0:
+    output = "No concerts found."
+  return output
 
-  #print("res: %s" % response)
-  return response['choices'][0]['message']['content']
 
 
 if __name__ == "__main__":

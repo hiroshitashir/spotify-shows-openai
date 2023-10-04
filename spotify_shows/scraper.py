@@ -19,7 +19,7 @@ async def get_content(url: str) -> str:
     Extract the article from the URL with Python's Trafilatura library and Pyppeteer
     """
     # Scrape the page with Pyppeteer headless browser
-    #print(f"get_content url: {url}")
+    print(f"get_content url: {url}")
     scraper = Scraper()
     await scraper.set_browser()
     try:

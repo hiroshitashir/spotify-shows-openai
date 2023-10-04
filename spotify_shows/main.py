@@ -14,7 +14,7 @@ async def main():
 
   top_artists = sp.current_user_top_artists(limit=15)
   #print("Your top artists: %s" % top_artists)
-  #top_artists = { 'items': [{'name': "Bay Ledges"}] }
+  #top_artists = { 'items': [{'name': "Jack Johnson"}] }
 
   output = ""
   for a in top_artists['items']:
@@ -37,8 +37,9 @@ async def main():
 
 
 def askNearbyConcerts(locName, htmlContent):
-  prompt = f"""Extract concert information (date, location, distance from {locName}) 
-  in html provided by user. Are there concerts 100 miles from {locName} within 30 days? 
+  prompt = f"""Extract concert information in html provided by user: date, location, 
+  distance from {locName}. Are there concerts within 100 miles from {locName} and 
+  in the next 30 days? 
   If so, list concerts in the desired format below surrounded by triple backquotes. 
   The list should be ordered by concert dates. Otherwise, return 'No concerts found.'
 
